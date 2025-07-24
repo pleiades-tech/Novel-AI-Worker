@@ -142,8 +142,9 @@ def process_job(job_id: str):
             process_chapter_audio(chapter_dialogues=dialogues, output_dir=chapter_output_dir, job_id=job_id, chapter_title=chapter_title)
 
             chapter_dynamo_obj.append({
+                "chapter_index": i,
                 "title": chapter_title,
-                "metatdata_s3_key": os.path.join(f"generated/{job_id}", unique_chapter_filename, 'metadata.json')
+                "metadata_s3_key": os.path.join(f"generated/{job_id}", unique_chapter_filename, 'metadata.json')
             })
             
         # Update the chapter info to dynamodb for quick access 
