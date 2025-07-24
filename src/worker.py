@@ -132,9 +132,10 @@ def process_job(job_id: str):
             print(f"Processing: {chapter_path}...")
             _filename = os.path.basename(chapter_path) #novelname.pdf
             chapter_title = os.path.splitext(_filename)[0] #novelname
+            unique_chapter_filename = f"{i}_{chapter_title}"
 
             # Create a dedicated output folder for each chapter, use index to avoid same chapter name
-            chapter_output_dir = os.path.join(generated_output_dir, f"{i}_{chapter_title}")
+            chapter_output_dir = os.path.join(generated_output_dir, unique_chapter_filename)
             os.makedirs(chapter_output_dir, exist_ok=True)
 
             dialogues = extract_dialogue_from_pdf(chapter_path)
@@ -142,7 +143,7 @@ def process_job(job_id: str):
 
             chapter_dynamo_obj.append({
                 "title": chapter_title,
-                "metatdata_s3_key": os.path.join(f"generated/{job_id}", chapter_output_dir, 'metadata.json')
+                "metatdata_s3_key": os.path.join(f"generated/{job_id}", unique_chapter_filename, 'metadata.json')
             })
             
         # Update the chapter info to dynamodb for quick access 
