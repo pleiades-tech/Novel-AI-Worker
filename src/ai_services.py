@@ -13,10 +13,10 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv('GEMINI_KEY'))
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
-def extract_chapter_from_pdf(input_path):
-  print(f"extract chapter from {input_path}...")
+def extract_chapter_from_pdf(src_path):
+  print(f"extract chapter from {src_path}...")
 
-  filepath = pathlib.Path(input_path)
+  filepath = pathlib.Path(src_path)
   prompt = "From the provided novel pdf file, extract the start and end page of each chapter in json format. Ignore the extra chapter that have to story in it e.g. Character_Pages, Other_Volumes, Appendix etc."
   response = client.models.generate_content(
     model="gemini-2.5-flash",
@@ -33,10 +33,10 @@ def extract_chapter_from_pdf(input_path):
   return json.loads(response.text)
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
-def extract_dialogue_from_pdf(input_path):
-  print(f"extract dialogue from {input_path}...")
+def extract_dialogue_from_pdf(src_path):
+  print(f"extract dialogue from {src_path}...")
 
-  filepath = pathlib.Path(input_path)
+  filepath = pathlib.Path(src_path)
   prompt = """
   From the provided novel pdf file, I want you to extract the dialogue found in it in to json format.
   you must follow this instructions

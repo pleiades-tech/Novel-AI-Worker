@@ -56,7 +56,7 @@ def is_valid_dialogue(text: str) -> bool:
     """Checks if a string is suitable for TTS."""
     return bool(text and re.search(r'[a-zA-Z0-9]', text))
 
-def process_chapter_audio(job_id: str, chapter_title: str, chapter_dialogues: list, output_dir: str):
+def process_chapter_audio(chapter_dialogues: list, output_dir: str, job_id: str, chapter_title: str, ):
     """Generates audio for each dialogue and saves it along with metadata."""
     chapter_metadata = {
         "job_id": job_id,
@@ -76,7 +76,7 @@ def process_chapter_audio(job_id: str, chapter_title: str, chapter_dialogues: li
         local_audio_path = os.path.join(output_dir, audio_filename)
         
         try:
-            generate_voice(dialogue, local_audio_path)
+            generate_voice(text=dialogue, dst_path=local_audio_path)
 
         except Exception as e:
             logger.error(f"[{job_id}] Voice gen FAILED for dialogue: '{dialogue[:50]}...'. Error: {e}")
@@ -119,7 +119,7 @@ def process_job(job_id: str):
 
         # Step 2: Split original PDF into chapter PDFs in a temp sub-folder
         chapters_dir = os.path.join(job_temp_dir, "chapters")
-        chapter_paths = split_chapter_from_pdf(local_pdf_path, chapter_data, chapters_dir)
+        chapter_paths = split_chapter_from_pdf(src_path=local_pdf_path,  dst_path=chapters_dir, chapters_stem=chapter_data,)
         
         # Step 3: Process each chapter PDF
         generated_output_dir = os.path.join(job_temp_dir, "generated_output")
@@ -127,12 +127,13 @@ def process_job(job_id: str):
 
         for i, chapter_path in enumerate(chapter_paths):
             print(f"Processing: {chapter_path}...")
-            # Create a dedicated output folder for each chapter
-            chapter_output_dir = os.path.join(generated_output_dir, f"{i}_{os.path.basename(chapter_path)}")
+            chapter_title = os.path.basename(chapter_path)
+            # Create a dedicated output folder for each chapter, use index to avoid same chapter name
+            chapter_output_dir = os.path.join(generated_output_dir, f"{i}_{chapter_title}")
             os.makedirs(chapter_output_dir, exist_ok=True)
 
             dialogues = extract_dialogue_from_pdf(chapter_path)
-            process_chapter_audio(job_id, dialogues, chapter_output_dir)
+            process_chapter_audio(chapter_dialogues=dialogues, output_dir=chapter_output_dir, job_id=job_id, chapter_title=chapter_title)
         
         # Step 4: Upload all generated files to S3
         logger.info(f"[{job_id}] - Uploading generated files to S3.")

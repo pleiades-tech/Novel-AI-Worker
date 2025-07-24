@@ -3,16 +3,16 @@ import shutil
 from PyPDF2 import PdfReader, PdfWriter
 from datatypes import NovelChapter
 
-def split_chapter_from_pdf(input_pdf_path: str, chapters_stem: list[NovelChapter], output_dir: str):
+def split_chapter_from_pdf(src_path: str,  dst_path: str, chapters_stem: list[NovelChapter],):
     """
     Splits a single PDF into multiple chapter-based PDFs based on JSON data.
     """
 
     print("split chapter from pdf..")
 
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(dst_path, exist_ok=True)
 
-    reader = PdfReader(input_pdf_path)
+    reader = PdfReader(src_path)
 
     if len(chapters_stem) == 1:
         title = chapters_stem[0].get("title")
@@ -23,8 +23,8 @@ def split_chapter_from_pdf(input_pdf_path: str, chapters_stem: list[NovelChapter
         filename_safe_title = filename_safe_title.rstrip('._')
         filename_safe_title = filename_safe_title.replace('__', '_')
 
-        output_filename = os.path.join(output_dir, f"{filename_safe_title}.pdf")
-        shutil.copy2(input_pdf_path, output_filename)
+        output_filename = os.path.join(dst_path, f"{filename_safe_title}.pdf")
+        shutil.copy2(src_path, output_filename)
 
         return [output_filename]
 
@@ -51,7 +51,7 @@ def split_chapter_from_pdf(input_pdf_path: str, chapters_stem: list[NovelChapter
         filename_safe_title = filename_safe_title.rstrip('._')
         filename_safe_title = filename_safe_title.replace('__', '_')
 
-        output_filename = os.path.join(output_dir, f"{filename_safe_title}.pdf")
+        output_filename = os.path.join(dst_path, f"{filename_safe_title}.pdf")
 
         output_file_list.append(output_filename)
 
