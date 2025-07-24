@@ -127,7 +127,8 @@ def process_job(job_id: str):
 
         for i, chapter_path in enumerate(chapter_paths):
             print(f"Processing: {chapter_path}...")
-            chapter_title = os.path.basename(chapter_path)
+            _filename = os.path.basename(chapter_path) #novelname.pdf
+            chapter_title = os.path.splitext(_filename)[0] #novelname
             # Create a dedicated output folder for each chapter, use index to avoid same chapter name
             chapter_output_dir = os.path.join(generated_output_dir, f"{i}_{chapter_title}")
             os.makedirs(chapter_output_dir, exist_ok=True)
