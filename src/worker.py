@@ -100,7 +100,7 @@ def process_job(job_id: str):
     # Create a unique temporary directory for this specific job
     job_temp_dir = os.path.join(tempfile.gettempdir(), job_id)
     os.makedirs(job_temp_dir, exist_ok=True)
-    local_pdf_path = os.path.join(job_temp_dir, "novel.pdf")
+    local_pdf_path = os.path.join(job_temp_dir, "source_novel.pdf")
 
     try:
         logger.info(f"[{job_id}] - Starting job processing.")
@@ -110,7 +110,7 @@ def process_job(job_id: str):
             ExpressionAttributeValues={":status": "PROCESSING"},
         )
 
-        source_s3_key = f"sources/{job_id}/novel.pdf"
+        source_s3_key = f"sources/{job_id}/source_novel.pdf"
         logger.info(f"[{job_id}] - Downloading {source_s3_key}...")
         s3.download_file(S3_BUCKET_NAME, source_s3_key, local_pdf_path)
 
@@ -125,16 +125,33 @@ def process_job(job_id: str):
         generated_output_dir = os.path.join(job_temp_dir, "generated_output")
         os.makedirs(generated_output_dir, exist_ok=True)
 
+        # For Dynamo DB
+        chapter_dynamo_obj = []
+        
         for i, chapter_path in enumerate(chapter_paths):
             print(f"Processing: {chapter_path}...")
             _filename = os.path.basename(chapter_path) #novelname.pdf
             chapter_title = os.path.splitext(_filename)[0] #novelname
+
             # Create a dedicated output folder for each chapter, use index to avoid same chapter name
             chapter_output_dir = os.path.join(generated_output_dir, f"{i}_{chapter_title}")
             os.makedirs(chapter_output_dir, exist_ok=True)
 
             dialogues = extract_dialogue_from_pdf(chapter_path)
             process_chapter_audio(chapter_dialogues=dialogues, output_dir=chapter_output_dir, job_id=job_id, chapter_title=chapter_title)
+
+            chapter_dynamo_obj.append({
+                "title": chapter_title,
+                "metatdata_s3_key": os.path.join(f"generated/{job_id}", chapter_output_dir, 'metadata.json')
+            })
+            
+        # Update the chapter info to dynamodb for quick access 
+        table.update_item(
+            Key={"JobID": job_id},
+            UpdateExpression="SET Chapters= :chapterObject",
+            ExpressionAttributeValues={":chapterObject": chapter_dynamo_obj},
+        )
+
         
         # Step 4: Upload all generated files to S3
         logger.info(f"[{job_id}] - Uploading generated files to S3.")
