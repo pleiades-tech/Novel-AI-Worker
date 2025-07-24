@@ -6,8 +6,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.39.11",
+    "chatterbox-tts>=0.1.2",
     "dotenv>=0.9.9",
     "google-genai>=1.26.0",
+    "pip>=25.1.1",
     "pypdf2>=3.0.1",
     "tenacity>=8.5.0",
 ]

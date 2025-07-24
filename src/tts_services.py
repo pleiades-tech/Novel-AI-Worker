@@ -3,9 +3,7 @@ import torchaudio as ta
 
 from chatterbox.tts import ChatterboxTTS
 
-from config import TEMP_GENERATED
-
-AUDIO_PROMPT_PATH = '../meta/baldurs_gate_narrator.wav' 
+AUDIO_PROMPT_PATH = 'meta/baldurs_gate_narrator.wav' 
 
 model = ChatterboxTTS.from_pretrained(device="cuda")
 
