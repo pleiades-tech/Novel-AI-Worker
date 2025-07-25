@@ -28,6 +28,7 @@ def split_chapter_from_pdf(src_path: str,  dst_path: str, chapters_stem: list[No
 
         return [output_filename]
 
+    output_file_list=[]
     for chapter_info in chapters_stem:
         title = chapter_info["title"]
         start_page = chapter_info["start_page"]
@@ -35,7 +36,6 @@ def split_chapter_from_pdf(src_path: str,  dst_path: str, chapters_stem: list[No
 
         writer = PdfWriter()
 
-        output_file_list=[]
 
         for page_num in range(start_page - 1, end_page):
             if page_num < len(reader.pages):
